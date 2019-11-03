@@ -1,172 +1,161 @@
-globals [ deltat neighborsX neighborsY celulas pegamento poliMAX lacMAX protMAX protMAXactive degradLAC degradPROT degradPROTactive alphaPOLI alphaLAC alphaPROT alphaPROTactive limLAC limPOLI limPOLIprot diffcoeff hole hole1 hole2]
-patches-own [ prot prot_activa lactona polisacarido deltaxL deltayL iter]
+globals [deltat t neighborsX neighborsY cells glue polyMAX lacMAX protMAX
+         protMAXactive degradLAC limLAC limPOLY limPOLYprot hole hole1 hole2]
+patches-own [prot active_protein lactone polysaccharide deltaxL deltayL iter]
 
 
 to setup
   clear-all
-  set celulas (patch-set patches with [pzcor = 0])
-  set pegamento (patch-set patches with [pzcor = 1])
-  set diffcoeff 0.2
-  set alphaPOLI 0.3
-  set alphaLAC 0.2
-
-  set alphaPROT 0.7
-  set alphaPROTactive 0.9
-  set degradPROT 0.5
-  set degradPROTactive 0.7
-  set protMAX alphaPROT / ( degradPROT + alphaPROTactive * poliMAX )
-
-  set poliMAX 1
-
-  set protMAXactive alphaPROTactive * ( poliMAX) * protMAX / degradPROTactive
-
+  set cells (patch-set patches with [pzcor = 0])
+  set glue (patch-set patches with [pzcor = 1])
+  set protMAX alpha / (delta + beta * polyMAX)
+  set polyMAX 1
+  set protMAXactive beta * ( polyMAX) * protMAX / epsilon
   set degradLAC 0.07
-
-  set lacMAX (alphaLAC * protMAXactive) / degradLAC
+  set lacMAX (gamma * protMAXactive) / degradLAC
   set limLAC 0.1 * lacMAX
-  set limPOLI 0.15 * poliMAX
-
-  set limPOLIprot 0.99 * poliMAX
-
-  ask pegamento
+  set limPOLY 0.15 * polyMAX
+  set limPOLYprot 0.99 * polyMAX
+  ask glue
   [
     set prot 0
-    set prot_activa 0
-    set polisacarido poliMAX
-    set lactona 0
-    set pcolor scale-color blue polisacarido 0 (2 * poliMAX) ;lo escalamos al doble para que los colores queden mas nítidos
+    set active_protein 0
+    set polysaccharide polyMAX
+    set lactone 0
+    set pcolor scale-color blue polysaccharide 0 (2 * polyMAX) ;lo escalamos al doble para que los colores queden mas nítidos
   ]
-  ask celulas
+  ask cells
   [
     set prot 0
-    set prot_activa 0
-    set lactona 0
-    set polisacarido 0
-    set pcolor scale-color green lactona 0 (2 * lacMAX)
+    set active_protein 0
+    set lactone 0
+    set polysaccharide 0
+    set pcolor scale-color green lactone 0 (2 * lacMAX)
   ]
   set t 0
   set deltat 1
   if radius > 45 [set radius 45]
-  if hole_type < 2 [square_hole]
-  if hole_type = 2 [circle_hole]
-  if hole_type > 2 [random_hole]
-
 end
 
 
 to evolution
-  ask celulas [ prodPROT activePROT prodLAC diffusionLAC]
-
-  ask celulas [prodPOLI]
-  ask celulas
+  ask cells [prodPROT activePROT prodLAC diffusionLAC]
+  ask cells [prodPOLY]
+  ask cells
   [
-    set pcolor scale-color green lactona 0 (2 * lacMAX)
+    set pcolor scale-color green lactone 0 (2 * lacMAX)
   ]
-  ask pegamento
+  ask glue
   [
-    set pcolor scale-color blue polisacarido 0 (2 * poliMAX)
-    if (polisacarido < poliMAX) and ([lactona] of patch-at 0 0 -1 < limLAC ) [set pcolor white]
-    if (polisacarido > poliMAX / 100) [set pcolor scale-color blue polisacarido 0 (2 * poliMAX)]
+    set pcolor scale-color blue polysaccharide 0 (2 * polyMAX)
+    if (polysaccharide < polyMAX) and ([lactone] of patch-at 0 0 -1 < limLAC ) [set pcolor white]
+    if (polysaccharide > polyMAX / 100) [set pcolor scale-color blue polysaccharide 0 (2 * polyMAX)]
   ]
-
   set t t + deltat
 end
+
 
 to diffusionLAC
   set neighborsX (patch-set patch-at -1 0 0 patch-at 1 0 0)
   set neighborsY (patch-set patch-at 0 -1 0 patch-at 0 1 0)
-
-  set deltaxL ( sum ([lactona] of neighborsX) - (2 * lactona) )
-  set deltayL ( sum ([lactona] of neighborsY) - (2 * lactona) )
-  set lactona lactona + deltat * (diffcoeff * (deltaxL + deltayL) )
+  set deltaxL (sum ([lactone] of neighborsX) - (2 * lactone))
+  set deltayL (sum ([lactone] of neighborsY) - (2 * lactone))
+  set lactone lactone + deltat * (D * (deltaxL + deltayL))
 end
 
-to square_hole
-  ask celulas
-  [
-    set lactona 0
-  ]
 
-  ask pegamento with [ pxcor > ((max-pxcor - radius) / 2 ) and pxcor < (radius + ((max-pxcor - radius) / 2 )) and pycor > ((max-pycor - radius) / 2 ) and pycor < (radius + ((max-pycor - radius) / 2 )) ]
+to square_hole
+  ask cells
   [
-    set polisacarido 0.01 * poliMAX
-    set pcolor scale-color blue polisacarido 0 (2 * poliMAX)
-    if (polisacarido < poliMAX) [set pcolor white]
+    set lactone 0
+  ]
+  ask glue with [ pxcor > ((max-pxcor - radius) / 2 ) and pxcor < (radius + ((max-pxcor - radius) / 2 ))
+           and pycor > ((max-pycor - radius) / 2 ) and pycor < (radius + ((max-pycor - radius) / 2 )) ]
+  [
+    set polysaccharide 0.01 * polyMAX
+    set pcolor scale-color blue polysaccharide 0 (2 * polyMAX)
+    if (polysaccharide < polyMAX) [set pcolor white]
   ]
 end
 
 
 to circle_hole
-  ask celulas
+  ask cells
   [
-    set lactona 0
+    set lactone 0
   ]
-
   ask patch (max-pxcor / 2) (max-pycor / 2) 1
   [
-    set hole ( patch-set patches in-radius 42 with [pzcor = 1])
+    set hole ( patch-set patches in-radius radius with [pzcor = 1])
   ]
   ask hole
   [
-    set polisacarido 0.01 * poliMAX
-    set pcolor scale-color blue polisacarido 0 (2 * poliMAX)
-    if (polisacarido < poliMAX) [set pcolor white]
+    set polysaccharide 0.01 * polyMAX
+    set pcolor scale-color blue polysaccharide 0 (2 * polyMAX)
+    if (polysaccharide < polyMAX) [set pcolor white]
   ]
 end
 
+
 to random_hole
-  ask celulas
+  ask cells
   [
-    set lactona 0
+    set lactone 0
   ]
   ask patch (random-xcor) (random-ycor / 2) 1
   [
-    set hole1 ( patch-set patches in-radius 42 with [pzcor = 1])
+    set hole1 ( patch-set patches in-radius radius with [pzcor = 1])
   ]
   ask patch (random-xcor) (random-ycor / 2) 1
   [
-    set hole2 ( patch-set patches in-radius 42 with [pzcor = 1])
+    set hole2 ( patch-set patches in-radius radius with [pzcor = 1])
   ]
   ask hole1
   [
-    set polisacarido 0.01 * poliMAX
-    set pcolor scale-color blue polisacarido 0 (2 * poliMAX)
-    if (polisacarido < poliMAX) [set pcolor white]
+    set polysaccharide 0.01 * polyMAX
+    set pcolor scale-color blue polysaccharide 0 (2 * polyMAX)
+    if (polysaccharide < polyMAX) [set pcolor white]
 
   ]
   ask hole2
   [
-    set polisacarido 0.01 * poliMAX
-    set pcolor scale-color blue polisacarido 0 (2 * poliMAX)
-    if (polisacarido < poliMAX) [set pcolor white]
+    set polysaccharide 0.01 * polyMAX
+    set pcolor scale-color blue polysaccharide 0 (2 * polyMAX)
+    if (polysaccharide < polyMAX) [set pcolor white]
   ]
 end
 
 
+;; First differential equation: Photosensitive protein
 to prodPROT
-  set prot prot + deltat * (alphaPROT - degradPROT * prot - alphaPROTactive * prot * (poliMAX - [polisacarido] of patch-at 0 0 1) )
+  set prot prot + deltat * (alpha - delta * prot - beta * prot * (polyMAX - [polysaccharide] of patch-at 0 0 1) )
 end
 
+
+;; Second differential equation: Protein phosphorylation
 to activePROT
-  if [polisacarido] of patch-at 0 0 1 < limPOLIprot
+  if [polysaccharide] of patch-at 0 0 1 < limPOLYprot
   [
-    set prot_activa prot_activa + deltat * (alphaPROTactive * (poliMAX - [polisacarido] of patch-at 0 0 1) * prot - degradPROTactive * prot_activa )
+    set active_protein active_protein + deltat * (beta * (polyMAX - [polysaccharide] of patch-at 0 0 1) * prot - epsilon * active_protein )
   ]
 end
 
+
+;; Third differential equation: Lactone production
 to prodLAC
-  if [polisacarido] of patch-at 0 0 1 > limPOLI ;si hay un poco de polisacarido no llega toda la luz y se produce Lactona
+  if [polysaccharide] of patch-at 0 0 1 > limPOLY ; If there is little polysaccharide, no light and lactone is produced
   [
-    set lactona lactona + deltat * ( alphaLAC * prot - (degradLAC * lactona) )
+    set lactone lactone + deltat * (gamma * prot - (degradLAC * lactone))
   ]
 end
 
-to prodPOLI
-  if (lactona > limLAC) and ( ([polisacarido] of patch-at 0 0 1) < poliMAX)
+
+;; Fourth differential equation: Polysaccharide production
+to prodPOLY
+  if (lactone > limLAC) and (([polysaccharide] of patch-at 0 0 1) < polyMAX)
   [
     ask patch-at 0 0 1
     [
-      set polisacarido polisacarido + (deltat * ([lactona] of patch-at 0 0 -1) * [prot_activa] of patch-at 0 0 -1 * alphaPOLI )
+      set polysaccharide polysaccharide + (deltat * ([lactone] of patch-at 0 0 -1) * [active_protein] of patch-at 0 0 -1 * eta)
     ]
   ]
 end
@@ -201,10 +190,10 @@ ticks
 30.0
 
 BUTTON
-204
-37
-355
-70
+413
+118
+589
+151
 NIL
 evolution
 T
@@ -217,44 +206,11 @@ NIL
 NIL
 1
 
-INPUTBOX
-47
-329
-202
-389
-t
-336.0
-1
-0
-Number
-
-INPUTBOX
-46
-186
-223
-246
-hole_type
-1.0
-1
-0
-Number
-
-INPUTBOX
-47
-258
-202
-318
-radius
-45.0
-1
-0
-Number
-
 BUTTON
-53
-86
-193
-119
+503
+41
+680
+74
 NIL
 random_hole
 NIL
@@ -268,10 +224,10 @@ NIL
 1
 
 BUTTON
-204
-86
-354
-119
+503
+79
+680
+112
 NIL
 square_hole\n
 NIL
@@ -285,10 +241,10 @@ NIL
 1
 
 BUTTON
-53
-135
-354
-168
+319
+79
+496
+112
 NIL
 circle_hole
 NIL
@@ -302,10 +258,10 @@ NIL
 1
 
 BUTTON
-54
-37
-193
-70
+319
+41
+496
+74
 NIL
 setup
 NIL
@@ -316,6 +272,181 @@ NIL
 NIL
 NIL
 NIL
+1
+
+TEXTBOX
+35
+28
+368
+103
+Commands\n
+20
+26.0
+1
+
+TEXTBOX
+36
+59
+369
+154
+setup: Initiates the environment\nevolution: Runs the simulation\nsquare_hole: Adds square crack\ncircle_hole: Adds circle crack\nrandom_hole: Adds random craks 
+15
+0.0
+1
+
+TEXTBOX
+38
+180
+188
+205
+Parameters
+20
+26.0
+1
+
+SLIDER
+416
+362
+594
+395
+radius
+radius
+1
+50
+20.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+511
+321
+683
+354
+D
+D
+0.01
+0.3
+0.2
+0.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+324
+321
+502
+354
+eta
+eta
+0
+1
+0.3
+0.1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+324
+199
+501
+232
+alpha
+alpha
+0
+1
+0.7
+0.1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+324
+240
+501
+273
+gamma
+gamma
+0
+1
+0.2
+0.1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+509
+199
+682
+232
+beta
+beta
+0
+1
+0.9
+0.1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+510
+240
+682
+273
+delta
+delta
+0
+1
+0.5
+0.1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+324
+281
+501
+314
+epsilon
+epsilon
+0
+1
+0.7
+0.1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+510
+281
+682
+314
+zeta
+zeta
+0
+1
+0.07
+0.01
+1
+NIL
+HORIZONTAL
+
+TEXTBOX
+40
+213
+318
+403
+alpha: rate protein production\nbeta: efficiency binding prot-lactone\ngamma: rate lactone production\ndelta: decay protein\nepsilon: decay active protein\nzeta: decay lactone\nnu: rate production poly\nD : difussion coefficient\nradius: size crack
+15
+0.0
 1
 
 @#$#@#$#@
@@ -660,7 +791,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 3D 6.0.1
+NetLogo 3D 6.0.4
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
