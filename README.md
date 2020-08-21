@@ -1,4 +1,5 @@
 # BacillaFilla model
+###### _Authors: macasal & sgalella_
 
 Implementation of BacillaFilla model in Netlogo using different ordinary differential equations (ODEs). BacillaFilla is an genetic engineered bacteria designed to produce "concrete" in the building cracks when they are exposed to light. This bacteria was created by the [*igem*](https://igem.org/Main_Page) team of [Newcastle](https://2010.igem.org/Team:Newcastle/solution).
 
