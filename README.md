@@ -9,12 +9,13 @@ The model is interactive and holes can be created manually to observe how they b
 </p>
 
 
-#### Genetic circuit dynamics
+## Genetic circuit dynamics
 
 The following scheme shows the process to be modeled:
 <p align="center">
-    <img width="800" height="450" src="images/scheme.jpg">
+    <img width="800" height="450" src="images/scheme.png">
 </p>
+
 In this scheme, the photosensitive protein is ideal. It has two domains which are active depending on the light of the environment.
 
 1. In the scenario of few light in the environment, the protein will work as a transcription factor of the lactone.
@@ -25,18 +26,23 @@ In this scheme, the photosensitive protein is ideal. It has two domains which ar
 The dynamics of the system are described by four different ODEs:
 
 <p align="center">
-    <img width="200" height="180" src="images/equation1.jpg">
+    <img width="200" height="175" src="images/equation1.png">
 </p>
+
 
 where *P* is the concentration of the protein, *Pf* is the concentration of the phosporylated protein and *L* is the concentration of lactone. The equation for the dynamics of the polyssacharide are described by the following ODE:
 
 <p align="center">
-    <img width="120" height="70" src="images/equation2.jpg">
+    <img width="140" height="70" src="images/equation2.png">
 </p>
+
 
 The model integrates 7 different parameters denoting the rate of creation or elimination of the component (growth or decay of the concentration).
 
-#### Performance
+
+
+## Performance
+
 In the presence of a crack, the lactone begins to be released in the side of the plate with no light (black):
 
 <p align="center">
@@ -50,6 +56,6 @@ Once the diffussion has begun, bacteria in the other side of the plate begin to 
 </p>
 
 
+## Installation
 
-#### Installation
 The code has been tested in Netlogo 3D 6.0.4 2019a. To run the code, open the file and follow the instructions. Press *Setup* to initiate the environment. Press the button for the crack shape to be simulated. Finally, press *evolution* to run the simulation. Move the sliders to change any parameter of the model.
